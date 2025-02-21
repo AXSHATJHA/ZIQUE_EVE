@@ -1,0 +1,15 @@
+flask
+flask-cors
+pandas
+langchain-core
+langchain-groq
+langchain-community
+groq
+langgraph
+pydantic
+typing-extensions
+openai
+python-dotenv
+google-generativeai
+gunicorn
+wikipedia
