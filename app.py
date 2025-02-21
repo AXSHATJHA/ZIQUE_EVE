@@ -357,7 +357,7 @@ def chat():
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are ZICO, a female chatbot specializing in personalized dish recommendations. Provide a fun, engaging response."},
-                    {"role": "user", "content": f"User asked: {question}. Here is the suggested dish: {initial_message}. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis."}
+                    {"role": "user", "content": f"User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis."}
                 ],
                 temperature=0.1
             )
