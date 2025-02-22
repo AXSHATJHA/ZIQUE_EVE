@@ -282,7 +282,7 @@ def chat():
                 === CHRONOLOGICAL HISTORY ===
                 {chat_history[-5:]}
 
-                === ACTIVE USER PALATE PROFILE ===
+                ===USER PALATE PROFILE ===
                 Dietary Identity: {', '.join(user_prefs['diet']) or 'None specified'}
                 Absolute Exclusions: {', '.join(user_prefs['allergens']) or 'None'}
                 Flavor Priorities: {', '.join(user_prefs['flavors']) or 'Open to all'}
@@ -290,6 +290,32 @@ def chat():
 
                 === CURRENT REQUEST ===
                 "{question}"
+
+                CONTEXTUAL PRIORITIZATION:
+                 1. **Current Intent**: Treat the user's latest question as the primary driver. If it contains explicit modifiers (e.g., "vegetarian version of the last dish"), override previous filters.
+                 2. **Conversational Thread**: Identify patterns in chat history:
+                 - Repeated flavor mentions → Prioritize those flavors even if not in current query
+                 - Sequential requests (e.g., "more options" → same category, varied proteins)
+                 - Implicit preferences (e.g., if 3/5 last dishes were salads → favor light options)
+                 3. **Temporal Weighting**: Recent messages (last 2-3 exchanges) have 2x impact vs older history.
+
+                RESPONSE PROTOCOL:
+                    1. **Opening Context**: 
+                    - Acknowledge previous dish if relevant ("Building on your sushi choice...")
+                    - Explicitly state *why* the recommendation fits the *current* ask
+                    2. **Proactive Anticipation**:
+                    - If history shows repeated "more" requests → Offer 2 alternatives upfront
+                    - For dietary shifts (e.g., vegan → vegetarian), explain compatibility
+                    3. **Tone Enforcement**:
+                    - Use contractions ("you'll love") and food emotiveness ("velvety sauce")
+                    - Never list numbers → "protein-packed" not "25g protein"
+                    - For "compare" requests → Use relative terms ("lighter than your last pick") 
+
+                DYNAMIC FILTER ADJUSTMENT:
+                - If the current query contradicts previous preferences (e.g., "Ignore my keto rule today"), temporarily disable conflicting filters
+                - For vague requests ("Something new"), use history to infer:
+                - Last dish category → Suggest adjacent cuisines
+                - Average calorie range → Stay within ±15%        
 
                 ANALYTICAL FRAMEWORK:
                 1. PALATE-TRIGGERED FILTERS:
@@ -357,7 +383,8 @@ def chat():
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are ZICO, a female chatbot specializing in personalized dish recommendations. Provide a fun, engaging response."},
-                    {"role": "user", "content": f"User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis."}
+                    {"role": "user", "content": f"""User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis. EXAMPLE OUTPUT:
+"Since you enjoyed the Truffle Mushroom Sushi yesterday, how about the **Truffle Avocado Salad**? It keeps that earthy vibe you love but adds fresh crunch for lunch. Vegetarian-friendly and under your 400-calorie sweet spot!"""}
                 ],
                 temperature=0.1
             )
