@@ -386,7 +386,8 @@ def chat():
                     {"role": "user", "content": f"""User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis. EXAMPLE OUTPUT:
 "Since you enjoyed the Truffle Mushroom Sushi yesterday, how about the **Truffle Avocado Salad**? It keeps that earthy vibe you love but adds fresh crunch for lunch. Vegetarian-friendly and under your 400-calorie sweet spot!"""}
                 ],
-                temperature=0.1
+                temperature=0.1,
+                max_tokens=100
             )
 
             response_text = refined_response.choices[0].message.content
