@@ -368,7 +368,7 @@ async def chat_endpoint(request: ChatRequest):
                 FORMATTING TEMPLATE:
                     **(Dish Name)**
                     - Culinary Profile: (Dish Category) | (Flavor Profile)
-                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein
+                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs
                     - Perfect Match Because: 
                     🎯 Combines your love for (user_flavor) with (diet_type) needs
                     ⏰ Ideal for (meal_type) with (key_characteristic)
@@ -378,7 +378,7 @@ async def chat_endpoint(request: ChatRequest):
                     EXAMPLE IMPLEMENTATION:
                     **Spicy Tuna Sushi**
                     - Culinary Profile: Japanese Fusion | Spicy Umami
-                    - Nutrition Spotlight: 360kcal • 22g protein
+                    - Nutrition Spotlight: 360kcal • 22g protein  12g carbs
                     - Perfect Match Because:
                     🎯 Balances your spice preference with keto compliance
                     ⏰ Light yet satisfying lunch option
@@ -408,6 +408,7 @@ async def chat_endpoint(request: ChatRequest):
                     {
                         "role": "system", 
                         "content": f"""Format responses EXACTLY like this:
+                        If there is no dish, then write : Try something else please.
                         Start with a line like :looking for something spicy? here:)
 
                          **[Dish Name]**
