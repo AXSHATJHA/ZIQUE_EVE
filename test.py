@@ -368,7 +368,7 @@ async def chat_endpoint(request: ChatRequest):
                 FORMATTING TEMPLATE:
                     **(Dish Name)**
                     - Culinary Profile: (Dish Category) | (Flavor Profile)
-                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs
+                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs (GET THE CARBS AS WELL FROM THE DATASET)
                     - Perfect Match Because: 
                     🎯 Combines your love for (user_flavor) with (diet_type) needs
                     ⏰ Ideal for (meal_type) with (key_characteristic)
@@ -417,7 +417,7 @@ async def chat_endpoint(request: ChatRequest):
                          {', '.join(user_prefs['cuisine'])} flavors
                          Features {', '.join(user_prefs['staple'])}
                         
-                        [NUM]kcal • [NUM]g protein • [NUM]g carbs
+                        [NUM]kcal • [NUM]g protein • [NUM]g carbs (get the carbs right!)
                         [Friendly question about details]"""
                     },
                     {
