@@ -304,6 +304,7 @@ async def chat_endpoint(request: ChatRequest):
 
                 CONTEXTUAL PRIORITIZATION:
 
+
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
                 FOR EXAMPLE IF THE LAST ANSWER IS : 
                 "role": "assistant",
@@ -315,6 +316,7 @@ async def chat_endpoint(request: ChatRequest):
                 - Sequential requests (e.g., "more options" → same category, varied proteins)
                 - Implicit preferences (e.g., if 3/5 last dishes were salads → favor light options)
                 3. **Temporal Weighting**: Recent messages (last 2-3 exchanges) have 2x impact vs older history.
+                -> IF THE USER HAS ASKED FOR A DISH CATEGORY THAT DOES NOT EXIST LIKE A DRINK DO NOT SUGGEST ANY DISH.....
                 4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with pasta).
 
                 RESPONSE PROTOCOL:
