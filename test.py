@@ -402,53 +402,37 @@ async def chat_endpoint(request: ChatRequest):
                 messages=[
                     {
                         "role": "system", 
-                        "content": """You are ZICO, a friendly culinary assistant. Format responses as a compact table with:
-                        1. Dish name as header
-                        2. Key attributes as bullet points
-                        3. Personalized reason for recommendation
-                        4. Calorie info
-                        5. Fun closing phrase
-                        Use this format:
+                        "content": f"""Format responses EXACTLY like this:
                         
-                         Looking for something [adjective]? Try this!
-                        ┌──────────────────┬───────────────────────────────┐
-                        │ Dish: [Name]     │ Flavor: [Descriptor]          │
-                        ├──────────────────┼───────────────────────────────┤
-                        │ Perfect because: │ [Personalized reason]         │
-                        │ Calories:        │ [Number] kcal                 │
-                        └──────────────────┴───────────────────────────────┘
-                        [Closing phrase] 
-                        Ask me for details! """
+                         **[Dish Name]**
+                         {', '.join(user_prefs['diet'])} compliant
+                         No {', '.join(user_prefs['allergens'])}
+                         {', '.join(user_prefs['cuisine'])} flavors
+                         Features {', '.join(user_prefs['staple'])}
+                        
+                        [NUM]kcal • [NUM]g protein • [NUM]g carbs
+                        [Friendly question about details]"""
                     },
                     {
                         "role": "user",
-                        "content": f"""User query: {question}
-                        Initial suggestion: {initial_message}
-                        Craft response with:
-                        - 1-line catchy intro
-                        - Box-style table (unicode characters)
-                        - 2-3 word flavor descriptor
-                        - Specific palate/diet match
-                        - Calorie count from data
-                        - Friendly sign-off
-                        Example:
-                         Craving heat? Perfect pick!
-                        ┌──────────────────┬───────────────────────────────┐
-                        │ Dish: Spicy Laksa│ Flavor: Fiery Coconut         │
-                        ├──────────────────┼───────────────────────────────┤
-                        │ Perfect because: │ Matches your vegan diet +     │
-                        │                  │ love for Malaysian flavors    │
-                        │ Calories:        │ 420 kcal                      │
-                        └──────────────────┴───────────────────────────────┘
-                         Chopsticks ready? Dive in! 
-                        Ask me for details! """
+                        "content": f"""Raw suggestion: {initial_message}
+                        Structure it with:
+                        1. First line: 1 relevant emoji + bold name
+                        2. 4 checkmark lines from user preferences
+                        3. Nutrition numbers from suggestion
+                        4. Short friendly closing"""
                     }
                 ],
                 temperature=0.1,
-                max_tokens=150
+                max_tokens=100
             )
 
             response_text = refined_response.choices[0].message.content
+
+            response_text = response_text.replace(" **", "**") \
+                                       .replace("** ", "**") \
+                                       .replace(" g ", "g") \
+                                       .replace(" kcal", "kcal")
 
             # Update chat history
             chat_history.append({"role": "user", "content": question})
