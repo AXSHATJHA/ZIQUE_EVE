@@ -414,10 +414,13 @@ async def chat_endpoint(request: ChatRequest):
                         Start with a line like :looking for something spicy? here:)
 
                          **[Dish Name]**
+                         Something related to (
                          {', '.join(user_prefs['diet'])} compliant
                          No {', '.join(user_prefs['allergens'])}
                          {', '.join(user_prefs['cuisine'])} flavors
                          Features {', '.join(user_prefs['staple'])}
+                         )
+                         
                         
                         [NUM]kcal • [NUM]g protein • [NUM]g carbs (get the carbs right!)
                         [Friendly question about details]"""
@@ -425,8 +428,9 @@ async def chat_endpoint(request: ChatRequest):
                     {
                         "role": "user",
                         "content": f"""Raw suggestion: {initial_message}
-                        Structure it with:
-                        1. First line: 1 relevant emoji + bold name
+                        Understand this suggestion.
+                        Structure the suggestion with your expertise:
+                        1. First line: Greeting + bold name
                         2. 4 checkmark lines from user preferences
                         3. Nutrition numbers from suggestion
                         4. Short friendly closing"""
