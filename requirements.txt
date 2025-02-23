@@ -13,3 +13,5 @@ python-dotenv
 google-generativeai
 gunicorn
 wikipedia
+fastapi==0.109.0
+uvicorn==0.27.0
