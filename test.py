@@ -303,7 +303,12 @@ async def chat_endpoint(request: ChatRequest):
                 "{question}"
 
                 CONTEXTUAL PRIORITIZATION:
-                
+
+                IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
+                FOR EXAMPLE IF THE LAST ANSWER IS : 
+                "role": "assistant",
+                "content": "Looking for a cheesy delight? Here you go :)\n\n**Burrata Mozzarella with Basil Pesto Pizza**\nCompliant\nNo\nFlavors\nFeatures\n\n600kcal • 20g protein • 40g carbs\nWould you like to pair this pizza with a dessert or another dish for a delightful meal combination?"
+                Now the user says 'Yes'. So Suggest a desert from the dataset.
                 1. **Current Intent**: Treat the user's latest question as the primary driver. If it contains explicit modifiers (e.g., "vegetarian version of the last dish"), override previous filters.
                 2. **Conversational Thread**: Identify patterns in chat history:
                 - Repeated flavor mentions → Prioritize those flavors even if not in current query
