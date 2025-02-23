@@ -234,36 +234,38 @@ async def chat_endpoint(request: ChatRequest):
             user_prefs = {
                 'diet': set(),
                 'allergens': set(),
-                'flavors': set(),
-                'meal_type': set()
+                'cuisine': set(),
+                'dislikes': set(),
+                'staple': set()
             }
 
             # Extract user palate from chat history
             for msg in chat_history:
                 if msg["role"] == "user":
-                    content = msg["content"].lower()
+                    content = msg["content"]
 
-                    # Check if the message contains "USER PALATE"
-                    if "user palate" in content:
-                        # Extract the palate information
-                        palate_info = content.replace("user palate:", "").strip()
+                    # Check if the message contains "user palate"
+                    if "user palate" in content.lower():
+                        try:
+                            # Extract the JSON-like palate information
+                            start_index = content.find("{")
+                            end_index = content.rfind("}") + 1
+                            palate_json = content[start_index:end_index]
 
-                        # Split into individual preferences
-                        for pref in palate_info.split(","):
-                            pref = pref.strip()
-                            if "diet type:" in pref:
-                                diet = pref.replace("diet type:", "").strip()
-                                user_prefs['diet'].add(diet)
-                            elif "allergy:" in pref:
-                                allergen = pref.replace("allergy:", "").strip()
-                                user_prefs['allergens'].add(allergen)
-                            elif "flavor:" in pref:
-                                flavor = pref.replace("flavor:", "").strip()
-                                user_prefs['flavors'].add(flavor)
-                            elif "meal type:" in pref:
-                                meal_type = pref.replace("meal type:", "").strip()
-                                user_prefs['meal_type'].add(meal_type)
-            
+                            # Parse the JSON
+                            import json
+                            palate_data = json.loads(palate_json)
+
+                            # Extract preferences
+                            user_prefs['diet'].update(palate_data.get("diet", []))
+                            user_prefs['allergens'].update(palate_data.get("allergies", []))
+                            user_prefs['cuisine'].update(palate_data.get("cuisine", []))
+                            user_prefs['dislikes'].update(palate_data.get("dislikes", []))
+                            user_prefs['staple'].update(palate_data.get("staple", []))
+
+                        except Exception as e:
+                            print(f"Error parsing user palate: {e}")
+
             # Convert dietary columns to flags
             diet_columns = ['Vegetarian', 'Non-Vegetarian', 'Jain', 'Vegan', 'Gluten Free', 'Keto']
 
@@ -279,11 +281,9 @@ async def chat_endpoint(request: ChatRequest):
                     f"{row['Flavor Profile']} | {row['Dish Category']}\n"
                 )
 
-            # Use the chat history to improve context awareness
-            
-            # Construct prompt without constraints
+            # Construct prompt with user preferences
             prompt = f"""
-                ROLE: You are Zico, Gigi's AI culinary assistant. Synthesize menu data, chat history, and user preferences to create perfect dish matches.
+                ROLE: You are Zico, Eve's AI culinary assistant. Synthesize menu data, chat history, and user preferences to create perfect dish matches.
 
                 CONTEXTUAL ELEMENTS:
                 === DATASET ===
@@ -292,35 +292,38 @@ async def chat_endpoint(request: ChatRequest):
                 === CHRONOLOGICAL HISTORY ===
                 {chat_history[-5:]}
 
-                ===USER PALATE PROFILE ===
+                === USER PALATE PROFILE ===
                 Dietary Identity: {', '.join(user_prefs['diet']) or 'None specified'}
                 Absolute Exclusions: {', '.join(user_prefs['allergens']) or 'None'}
-                Flavor Priorities: {', '.join(user_prefs['flavors']) or 'Open to all'}
-                Meal Rhythm: {', '.join(user_prefs['meal_type']) or 'Any time'}
+                Preferred Cuisines: {', '.join(user_prefs['cuisine']) or 'Open to all'}
+                Dislikes: {', '.join(user_prefs['dislikes']) or 'None'}
+                Staples: {', '.join(user_prefs['staple']) or 'None'}
 
                 === CURRENT REQUEST ===
                 "{question}"
 
                 CONTEXTUAL PRIORITIZATION:
-                 1. **Current Intent**: Treat the user's latest question as the primary driver. If it contains explicit modifiers (e.g., "vegetarian version of the last dish"), override previous filters.
-                 2. **Conversational Thread**: Identify patterns in chat history:
-                 - Repeated flavor mentions → Prioritize those flavors even if not in current query
-                 - Sequential requests (e.g., "more options" → same category, varied proteins)
-                 - Implicit preferences (e.g., if 3/5 last dishes were salads → favor light options)
-                 3. **Temporal Weighting**: Recent messages (last 2-3 exchanges) have 2x impact vs older history.
-                 4. ADD A SUGGESTIVE DISH LIKE PAIR A PIZZA WITH A PASTA THAT GOES HAND IN HAND. SO SOMETIMES SUGGEST A DISH THAT PAIRS WITH THE CURRENT DISH.
+                
+                1. **Current Intent**: Treat the user's latest question as the primary driver. If it contains explicit modifiers (e.g., "vegetarian version of the last dish"), override previous filters.
+                2. **Conversational Thread**: Identify patterns in chat history:
+                - Repeated flavor mentions → Prioritize those flavors even if not in current query
+                - Sequential requests (e.g., "more options" → same category, varied proteins)
+                - Implicit preferences (e.g., if 3/5 last dishes were salads → favor light options)
+                3. **Temporal Weighting**: Recent messages (last 2-3 exchanges) have 2x impact vs older history.
+                4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with pasta).
 
                 RESPONSE PROTOCOL:
-                    1. **Opening Context**: 
-                    - Acknowledge previous dish if relevant ("Building on your sushi choice...")
-                    - Explicitly state *why* the recommendation fits the *current* ask
-                    2. **Proactive Anticipation**:
-                    - If history shows repeated "more" requests → Offer 2 alternatives upfront
-                    - For dietary shifts (e.g., vegan → vegetarian), explain compatibility
-                    3. **Tone Enforcement**:
-                    - Use contractions ("you'll love") and food emotiveness ("velvety sauce")
-                    - Never list numbers → "protein-packed" not "25g protein"
-                    - For "compare" requests → Use relative terms ("lighter than your last pick") 
+                IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONSRECOMMEND SOMETHING DIFFERENT FROM LAST CHOICE BUT NEVER RECOMMEND THE SAME LAST CHOICE OR JUST SAY NOT AVAILABLE.
+                1. **Opening Context**: 
+                - Acknowledge previous dish if relevant ("Building on your sushi choice...")
+                - Explicitly state *why* the recommendation fits the *current* ask
+                2. **Proactive Anticipation**:
+                - If history shows repeated "more" requests → Offer 2 alternatives upfront
+                - For dietary shifts (e.g., vegan → vegetarian), explain compatibility
+                3. **Tone Enforcement**:
+                - Use contractions ("you'll love") and food emotiveness ("velvety sauce")
+                - Never list numbers → "protein-packed" not "25g protein"
+                - For "compare" requests → Use relative terms ("lighter than your last pick") 
 
                 DYNAMIC FILTER ADJUSTMENT:
                 - If the current query contradicts previous preferences (e.g., "Ignore my keto rule today"), temporarily disable conflicting filters
@@ -332,7 +335,8 @@ async def chat_endpoint(request: ChatRequest):
                 1. PALATE-TRIGGERED FILTERS:
                 - Hard Exclusions: Automatically reject dishes containing {user_prefs['allergens']}
                 - Core Identity: Prioritize {user_prefs['diet']} compliant options
-                - Flavor Matching: Weight dishes with {user_prefs['flavors']} higher
+                - Cuisine Matching: Weight dishes from {user_prefs['cuisine']} higher
+                - Dislikes: Exclude dishes containing {user_prefs['dislikes']}
 
                 2. NUTRITIONAL INTERPRETATION:
                 Language Patterns → Nutritional Logic:
@@ -357,24 +361,22 @@ async def chat_endpoint(request: ChatRequest):
                 - 10% variety from previous suggestions
 
                 FORMATTING TEMPLATE:
-                **(Dish Name)**
-                - Culinary Profile: (Dish Category) | (Flavor Profile)
-                - Nutrition Spotlight: (Calories)kcal • (Protein)g protein
-                - Perfect Match Because: 
-                🎯 Combines your love for (user_flavor) with (diet_type) needs
-                ⏰ Ideal for (meal_type) with (key_characteristic)
-                🌟 Fresh alternative to (last_dish) ((improvement_metric))
-                You can also try the (dish that pairs with the current dish)
+                 looking for something spicy? here:)
+                    Dish Name - Panner Makhani
+                    Flavor profile- buttery, creamy (dish based)
+                    Why this? - because (data according to palate profile)
+                    (Ai generated ending like - enjoy your meal / bon appetite, etc) 
+                    Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc
+                
+                
 
                 EXAMPLE IMPLEMENTATION:
-                **Spicy Tuna Sushi**
-                - Culinary Profile: Japanese Fusion | Spicy Umami
-                - Nutrition Spotlight: 360kcal • 22g protein
-                - Perfect Match Because:
-                🎯 Balances your spice preference with keto compliance
-                ⏰ Light yet satisfying lunch option
-                🌟 20% leaner than your last tempura choice
-                You can pair it with with a Desert - (a desert choice)
+                looking for something spicy? here:)
+                    Dish Name - Panner Makhani
+                    Flavor profile- buttery, creamy (dish based)
+                    Why this? - because (data according to palate profile)
+                    (Ai generated ending like - enjoy your meal / bon appetite, etc) 
+                    Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc
 
                 PROHIBITED MENTIONS:
                 - Allergen information
@@ -382,11 +384,12 @@ async def chat_endpoint(request: ChatRequest):
                 - Calorie counting language
                 - Previous dish shortcomings
                 """
+
             # OpenAI API Call
             response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "system", "content": prompt}],
-                temperature=0.1
+                temperature=0.0
             )
 
             initial_message = response.choices[0].message.content
@@ -397,7 +400,7 @@ async def chat_endpoint(request: ChatRequest):
                 messages=[
                     {"role": "system", "content": "You are ZICO, a female chatbot specializing in personalized dish recommendations. Provide a fun, engaging response."},
                     {"role": "user", "content": f"""User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis. EXAMPLE OUTPUT:
-"Since you enjoyed the Truffle Mushroom Sushi yesterday, how about the **Truffle Avocado Salad**? It keeps that earthy vibe you love but adds fresh crunch for lunch. Vegetarian-friendly and under your 400-calorie sweet spot!"""}
+        "Since you enjoyed the Truffle Mushroom Sushi yesterday, how about the **Truffle Avocado Salad**? It keeps that earthy vibe you love but adds fresh crunch for lunch. Vegetarian-friendly and under your 400-calorie sweet spot!"""}
                 ],
                 temperature=0.1,
                 max_tokens=100
@@ -419,7 +422,6 @@ async def chat_endpoint(request: ChatRequest):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid datasource routing"
             )
-
 
     except Exception as e:
         raise HTTPException(
