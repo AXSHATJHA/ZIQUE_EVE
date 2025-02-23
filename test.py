@@ -361,22 +361,24 @@ async def chat_endpoint(request: ChatRequest):
                 - 10% variety from previous suggestions
 
                 FORMATTING TEMPLATE:
-                 looking for something spicy? here:)
-                    Dish Name - Panner Makhani
-                    Flavor profile- buttery, creamy (dish based)
-                    Why this? - because (data according to palate profile)
-                    (Ai generated ending like - enjoy your meal / bon appetite, etc) 
-                    Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc
-                
-                
+                    **(Dish Name)**
+                    - Culinary Profile: (Dish Category) | (Flavor Profile)
+                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein
+                    - Perfect Match Because: 
+                    🎯 Combines your love for (user_flavor) with (diet_type) needs
+                    ⏰ Ideal for (meal_type) with (key_characteristic)
+                    🌟 Fresh alternative to (last_dish) ((improvement_metric))
+                    You can also try the (dish that pairs with the current dish)
 
-                EXAMPLE IMPLEMENTATION:
-                looking for something spicy? here:)
-                    Dish Name - Panner Makhani
-                    Flavor profile- buttery, creamy (dish based)
-                    Why this? - because (data according to palate profile)
-                    (Ai generated ending like - enjoy your meal / bon appetite, etc) 
-                    Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc
+                    EXAMPLE IMPLEMENTATION:
+                    **Spicy Tuna Sushi**
+                    - Culinary Profile: Japanese Fusion | Spicy Umami
+                    - Nutrition Spotlight: 360kcal • 22g protein
+                    - Perfect Match Because:
+                    🎯 Balances your spice preference with keto compliance
+                    ⏰ Light yet satisfying lunch option
+                    🌟 20% leaner than your last tempura choice
+                    You can pair it with a dessert - (a dessert choice)
 
                 PROHIBITED MENTIONS:
                 - Allergen information
@@ -400,7 +402,12 @@ async def chat_endpoint(request: ChatRequest):
                 messages=[
                     {"role": "system", "content": "You are ZICO, a female chatbot specializing in personalized dish recommendations. Provide a fun, engaging response."},
                     {"role": "user", "content": f"""User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis. EXAMPLE OUTPUT:
-        "Since you enjoyed the Truffle Mushroom Sushi yesterday, how about the **Truffle Avocado Salad**? It keeps that earthy vibe you love but adds fresh crunch for lunch. Vegetarian-friendly and under your 400-calorie sweet spot!"""}
+                    " looking for something spicy? here:)
+                        Dish Name - Panner Makhani
+                        Flavor profile- buttery, creamy (dish based)
+                        Why this? - because (data according to palate profile)
+                        (Ai generated ending like - enjoy your meal / bon appetite, etc) 
+                        Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc"""}
                 ],
                 temperature=0.1,
                 max_tokens=100
