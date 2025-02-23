@@ -400,17 +400,52 @@ async def chat_endpoint(request: ChatRequest):
             refined_response = openai_client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are ZICO, a female chatbot specializing in personalized dish recommendations. Provide a fun, engaging response."},
-                    {"role": "user", "content": f"""User asked: {question}. Here is the suggested dish: {initial_message}. Recommend only 1 dish according to the question. Now reformat the response in a very concise and chatbot-ish way. Also greet only when the user has asked to or if the chat history {chat_history} is empty. Do not use emojis. EXAMPLE OUTPUT:
-                    " looking for something spicy? here:)
-                        Dish Name - Panner Makhani
-                        Flavor profile- buttery, creamy (dish based)
-                        Why this? - because (data according to palate profile)
-                        (Ai generated ending like - enjoy your meal / bon appetite, etc) 
-                        Let me know if you need more info - (this is our cue to give all details like calories, ingredients etc"""}
+                    {
+                        "role": "system", 
+                        "content": """You are ZICO, a friendly culinary assistant. Format responses as a compact table with:
+                        1. Dish name as header
+                        2. Key attributes as bullet points
+                        3. Personalized reason for recommendation
+                        4. Calorie info
+                        5. Fun closing phrase
+                        Use this format:
+                        
+                         Looking for something [adjective]? Try this!
+                        ┌──────────────────┬───────────────────────────────┐
+                        │ Dish: [Name]     │ Flavor: [Descriptor]          │
+                        ├──────────────────┼───────────────────────────────┤
+                        │ Perfect because: │ [Personalized reason]         │
+                        │ Calories:        │ [Number] kcal                 │
+                        └──────────────────┴───────────────────────────────┘
+                        [Closing phrase] 
+                        Ask me for details! """
+                    },
+                    {
+                        "role": "user",
+                        "content": f"""User query: {question}
+                        Initial suggestion: {initial_message}
+                        Craft response with:
+                        - 1-line catchy intro
+                        - Box-style table (unicode characters)
+                        - 2-3 word flavor descriptor
+                        - Specific palate/diet match
+                        - Calorie count from data
+                        - Friendly sign-off
+                        Example:
+                         Craving heat? Perfect pick!
+                        ┌──────────────────┬───────────────────────────────┐
+                        │ Dish: Spicy Laksa│ Flavor: Fiery Coconut         │
+                        ├──────────────────┼───────────────────────────────┤
+                        │ Perfect because: │ Matches your vegan diet +     │
+                        │                  │ love for Malaysian flavors    │
+                        │ Calories:        │ 420 kcal                      │
+                        └──────────────────┴───────────────────────────────┘
+                         Chopsticks ready? Dive in! 
+                        Ask me for details! """
+                    }
                 ],
                 temperature=0.1,
-                max_tokens=100
+                max_tokens=150
             )
 
             response_text = refined_response.choices[0].message.content
