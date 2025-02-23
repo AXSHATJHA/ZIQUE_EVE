@@ -403,7 +403,8 @@ async def chat_endpoint(request: ChatRequest):
                     {
                         "role": "system", 
                         "content": f"""Format responses EXACTLY like this:
-                        
+                        Start with a line like :looking for something spicy? here:)
+
                          **[Dish Name]**
                          {', '.join(user_prefs['diet'])} compliant
                          No {', '.join(user_prefs['allergens'])}
