@@ -475,6 +475,17 @@ async def chat_endpoint(request: ChatRequest):
                     Raw suggestion: {initial_message}
                     Previous Prompts: {chat_history[-1]}
 
+                    **Dish Name**
+                    - Culinary Profile: Dish Category | Flavor Profile
+                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs (GET THE CARBS AS WELL FROM THE DATASET)
+                    - Perfect Match Because: 
+                    🎯 Combines your love for (user_flavor) with (diet_type) needs
+                    ⏰ Ideal for (meal_type) with (key_characteristic)
+                    🌟 Fresh alternative to (last_dish) ((improvement_metric))
+                    You can also try the (dish that pairs with the current dish)
+
+                    In this case where dish name is not there, just say : "Kindly try another query please."
+
                     IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
 
                     First check the question and suggestion. If it does not match just write : "Kindly try another query please."
