@@ -401,8 +401,11 @@ async def chat_endpoint(request: ChatRequest):
                 - 10% variety from previous suggestions
 
                 FORMATTING TEMPLATE:
-                    **(Dish Name)**
-                    - Culinary Profile: (Dish Category) | (Flavor Profile)
+
+                IF DISH NOT FOUND -> NO DISHES MATCHED!
+
+                    **Dish Name**
+                    - Culinary Profile: Dish Category | Flavor Profile
                     - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs (GET THE CARBS AS WELL FROM THE DATASET)
                     - Perfect Match Because: 
                     🎯 Combines your love for (user_flavor) with (diet_type) needs
@@ -419,6 +422,8 @@ async def chat_endpoint(request: ChatRequest):
                     ⏰ Light yet satisfying lunch option
                     🌟 20% leaner than your last tempura choice
                     You can pair it with a dessert - (a dessert choice)
+
+                    Looking for a vegetarian delight with a spicy kick? Here's a dish that excludes your allergen, mushrooms, and aligns with your love for cottage cheese.\n\n**Mexican Bean and Guacamole Burger**\nA dish that aligns with:\n- Vegetarian compliant\n- Free from mushrooms\n- Spicy flavors\n- Features cottage cheese\n\n**600kcal**•**25g protein**•**80g carbs**\n\nHow about pairing this burger with a fresh salad for a complete meal?
 
                 PROHIBITED MENTIONS:
                 - Allergen information
