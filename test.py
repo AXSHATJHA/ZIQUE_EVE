@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from openai import OpenAI # type: ignore
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+import re
 
 df = pd.read_csv('Eve Macros Sheet.csv')  # Changed filename
 load_dotenv()
@@ -67,9 +68,6 @@ system = """
                 - "Show me vegetarian dishes under 300 calories"
                 - "High-protein keto options"
                 - "Gluten-free vegan meals"
-                - "What was the previous meal?"
-                - "calories in previous meal"
-                - "about previous meals"
         2. **general_chatbot (Direct Response):**
             - Greetings, help with menu navigation, or general inquiries
             - Examples:
@@ -80,6 +78,9 @@ system = """
                 - "What is my name?"
                 - "How do I use the chatbot?"
                 - "Which meals are dairy-free?"
+                - "What was the previous meal?"
+                - "calories in previous meal"
+                - "about previous meals"
         Always respond in JSON format:
         {{
           "datasource": "vectorstore|general_chatbot",
@@ -181,49 +182,81 @@ async def chat_endpoint(request: ChatRequest):
         if source.datasource == "general_chatbot":
             print("---General Chatbot----")
 
-            # Define the system prompt for the chatbot
+            # Define the enhanced system prompt
             system_prompt = """
-            IF THERE IS ANY QUERY THAT IS NOT RELATED TO RECOMMENDING DISHES OR NOT ANY GREETING JUST SAY THE MESSAGE THAT : (This chatbot is only for dish recommendation purposes and not for general queries, try something else please.)
-            Your name is Zico(always say it if greeted).
-            You are a friendly and helpful female AI assistant designed for general conversation and greeting purposes. 
-            Always respond in a warm, polite, and informative manner. If the user asks a question, provide a clear and concise answer. 
-            If the user engages in casual conversation, respond appropriately to keep the conversation flowing naturally.
+            YOUR IDENTITY:
+            - Name: Zico (always mention if greeted)
+            - Role: Hybrid Assistant (70% dish expert / 30% conversationalist)
+            
+            RESPONSE PROTOCOL:
+            1. PRIORITY QUERIES (Handle these first):
+            a) Calorie Inquiries:
+            - Pattern: "calories in last dish" / "previous meal calories" / "nutritional info"
+            - Action: 
+            1. Scan chat history for last recommended dish
+            2. If found: "The Dish Name had Calories kcal"
+            3. Add context: Compare to average (avg_cal kcal typical)
+            4. Not found: "Let me suggest something new!"
+
+            b) Greetings:
+            - Patterns: "Hi" / "Hello" / "Hey Zico" / Time-based (Good morning)
+            - Response: 
+            1. "Hello! [Time-based emoji] Zico here" 
+            2. Add food pun: "Ready to dish out recommendations!"
+
+            2. SECONDARY RESPONSES:
+            - Food-related questions: "What's tahini?" → Brief answer + recipe connection
+            - Personal: "Who made you?" → "I'm Chef Eve's digital sous-chef!"
+            
+            3. BOUNDARY CASES:
+            - Non-food queries: "Python code help" → "While I cook ideas, I only serve dish recommendations!"
+            - Multiple intents: "Hi, calories last dish?" → Handle both greeting + calorie check
             """
 
-            # Prepare the conversation history (last 5 messages)
-            last_5_messages = chat_history[-5:] if chat_history else []
+            # Analyze chat history for previous dishes
+            dish_history = [msg for msg in chat_history if "kcal" in msg.get("content", "")]
+            last_dish_info = dish_history[-1]["content"] if dish_history else None
 
-            # Construct the messages for the GPT API call
+            # Prepare conversation context
             messages = [
-                           {"role": "system", "content": system_prompt}
-                       ] + last_5_messages + [
-                           {"role": "user", "content": question}
-                       ]
+                {"role": "system", "content": system_prompt},
+                *chat_history[-5:],  # Last 5 messages
+                {"role": "user", "content": question}
+            ]
 
-            # Make the API call to GPT
+            # Add nutritional context if available
+            if last_dish_info:
+                messages.insert(1, {
+                    "role": "system", 
+                    "content": f"LAST DISH CONTEXT: {last_dish_info}"
+                })
+
             response = openai_client.chat.completions.create(
-                model="gpt-4",  # Use GPT-4 for better conversational abilities
+                model="gpt-4",
                 messages=messages,
-                temperature=0.4,  # Moderate temperature for balanced responses
-                max_tokens=400  # Limit response length
+                temperature=0.3,
+                max_tokens=100,
+                top_p=0.95
             )
 
-            # Extract the chatterbot's response
-            if response.choices and len(response.choices) > 0:
-                chatbot_response = response.choices[0].message.content
-            else:
-                chatbot_response = "I'm sorry, I couldn't generate a response. Please try again."
+            chatbot_response = response.choices[0].message.content
 
-            # Update the chat history
-            chat_history.append({"role": "user", "content": question})
-            chat_history.append({"role": "assistant", "content": chatbot_response})
-            chat_history = chat_history[-10:]  # Keep only the last 10 messages
+            # Post-processing
+            if "kcal" in chatbot_response and last_dish_info:
+                # Ensure numerical accuracy from history
+                calories_match = re.search(r"(\d+)kcal", last_dish_info)
+                if calories_match:
+                    calories = calories_match.group(1)
+                    chatbot_response = chatbot_response.replace("Calories", calories)
 
-            # Return the response and updated chat history
-            return {
-                "response": chatbot_response,
-                "chat_history": chat_history
-            }
+            # Update chat history (keep last 10 exchanges)
+            chat_history = chat_history[-8:] + [
+                {"role": "user", "content": question},
+                {"role": "assistant", "content": chatbot_response}
+            ]
+
+            return {"response": chatbot_response, "chat_history": chat_history}
+
 
         elif source.datasource == "vectorstore":
             print("---Handling Vectorstore Query---")
@@ -402,43 +435,58 @@ async def chat_endpoint(request: ChatRequest):
             )
 
             initial_message = response.choices[0].message.content
+            print(initial_message)
 
             # Refine with GPT-4
             refined_response = openai_client.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {
-                        "role": "system", 
-                        "content": f"""Format responses EXACTLY like this:
-                        If there is no dish, then write : Try something else please.
-                        Start with a line like :looking for something spicy? here:)
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""
+                    Format responses EXACTLY as follows:
 
-                         **[Dish Name]**
-                         Something related to (
-                         {', '.join(user_prefs['diet'])} compliant
-                         No {', '.join(user_prefs['allergens'])}
-                         {', '.join(user_prefs['cuisine'])} flavors
-                         Features {', '.join(user_prefs['staple'])}
-                         )
-                         
-                        
-                        [NUM]kcal • [NUM]g protein • [NUM]g carbs (get the carbs right!)
-                        [Friendly question about details]"""
-                    },
-                    {
-                        "role": "user",
-                        "content": f"""Raw suggestion: {initial_message}
-                        Understand this suggestion.
-                        Structure the suggestion with your expertise:
-                        1. First line: Greeting + bold name
-                        2. 4 checkmark lines from user preferences
-                        3. Nutrition numbers from suggestion
-                        4. Short friendly closing"""
-                    }
-                ],
-                temperature=0.1,
-                max_tokens=100
-            )
+                    IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
+
+                    - If there is 'Dish Name' written instead of a proper dish name, respond with: "Try something else, please."
+                    - Begin with an engaging opening line tailored to the user’s preferences. Example: "Craving something spicy? Here’s a great choice."
+                    
+                    **[Dish Name]**
+                    A dish that aligns with:
+                    - {', '.join(user_prefs['diet'])} compliant
+                    - Free from {', '.join(user_prefs['allergens'])}
+                    - {', '.join(user_prefs['cuisine'])} flavors
+                    - Features {', '.join(user_prefs['staple'])}
+                    
+                    **[NUM] kcal** • **[NUM]g protein** • **[NUM]g carbs** (Ensure accuracy in carbohydrate count.)
+                    
+                    [A friendly, concise follow-up question to engage the user. Be serious and never use emojis and stay professional.]
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+                    Current Question : {question}
+                    Raw suggestion: {initial_message}
+                    Previous Prompts: {chat_history[-1]}
+
+                    IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
+
+                    First check the question and suggestion. If it does not match just write : "Kindly try another query please."
+                    Also if the user has asked something previously connect the current response with it.
+                    
+                    Analyze the suggestion and refine it according to these principles:
+                    1. Craft an engaging opening that naturally introduces the dish.
+                    2. Present four checkmarked attributes based on user preferences.
+                    3. Extract and format nutritional information correctly.
+                    4. Conclude with a concise, engaging follow-up.
+                    """
+                }
+            ],
+            temperature=0.2,
+            max_tokens=100
+        )
+
 
             response_text = refined_response.choices[0].message.content
 
