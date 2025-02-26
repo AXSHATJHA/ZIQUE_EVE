@@ -299,6 +299,15 @@ async def chat_endpoint(request: ChatRequest):
                         except Exception as e:
                             print(f"Error parsing user palate: {e}")
 
+            print(f"""
+                Dietary Identity: {', '.join(user_prefs['diet']) or 'None specified'}
+                Absolute Exclusions: {', '.join(user_prefs['allergens']) or 'None'}
+                Preferred Cuisines: {', '.join(user_prefs['cuisine']) or 'Open to all'}
+                Dislikes: {', '.join(user_prefs['dislikes']) or 'None'}
+                Staples: {', '.join(user_prefs['staple']) or 'None'}
+                  """
+            )
+
             # Convert dietary columns to flags
             diet_columns = ['Vegetarian', 'Non-Vegetarian', 'Jain', 'Vegan', 'Gluten Free', 'Keto']
 
@@ -337,7 +346,7 @@ async def chat_endpoint(request: ChatRequest):
 
                 CONTEXTUAL PRIORITIZATION:
 
-
+                IF THE DIET IS NON-VEGETARIAN TRY SUGGESTING NON-VEGETARIAN DISH FIRST.
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
                 FOR EXAMPLE IF THE LAST ANSWER IS : 
                 "role": "assistant",
