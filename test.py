@@ -261,7 +261,7 @@ async def chat_endpoint(request: ChatRequest):
             print("---Handling Vectorstore Query---")
 
             # Load Eve's dataset
-            df = pd.read_csv("Eve Macros Sheet.csv")
+            df = pd.read_csv("Eve Macros Sheet_1.csv")
 
             user_prefs = {
                 'diet': set(),
@@ -308,7 +308,7 @@ async def chat_endpoint(request: ChatRequest):
             )
 
             # Convert dietary columns to flags
-            diet_columns = ['Vegetarian', 'Non-Vegetarian', 'Jain', 'Vegan', 'Gluten Free', 'Keto']
+            diet_columns = ['Vegetarian', 'Non-vegetarian', 'Jain', 'Vegan', 'Gluten-free', 'Keto']
 
             # Create dataset string
             dataset_str = "Dish Name | Calories | Protein | Carbs | Fats | Diets | Flavor | Dish Category\n"
@@ -316,11 +316,12 @@ async def chat_endpoint(request: ChatRequest):
             for _, row in df.iterrows():
                 diets = [col for col in diet_columns if row[col] == 'Yes']
                 dataset_str += (
-                    f"{row['Dish Name']} | {row['Total Calories (kcal)']}kcal | "
-                    f"{row['Total Protein (g)']}g | {row['Total Carbs (g)']}g | "
-                    f"{row['Total Fats (g)']}g | {', '.join(diets)} | "
-                    f"{row['Flavor Profile']} | {row['Dish Category']}\n"
+                    f"{row['Dish_Name']} | {row['Total_Calories_(kcal)']}kcal | "
+                    f"{row['Total_Protein_(g)']}g | {row['Total_Carbs_(g)']}g | "
+                    f"{row['Total_Fats_(g)']}g | {', '.join(diets)} | "
+                    f"{row['Flavor_Profile']} | {row['Dish_Category']}\n"
                 )
+
 
             # Construct prompt with user preferences
             prompt = f"""
