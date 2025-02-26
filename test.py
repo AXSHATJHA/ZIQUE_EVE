@@ -456,61 +456,53 @@ async def chat_endpoint(request: ChatRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": f"""
+                    "content": """
                     Format responses EXACTLY as follows:
 
-                    IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
+                    1. **Dish Name**: Extract the dish name from the initial message. If no dish name is found, respond with: "Kindly try another query, please."
 
-                    
-                    - Begin with an engaging opening line tailored to the user’s preferences. Example: "Craving something spicy? Here’s a great choice."
-                    
-                    **[Dish Name]**
+                    2. **Attributes**:
+                    - Acknowledge the user's dietary preferences (e.g., Non-Vegetarian, Italian).
+                    - Highlight allergens excluded (e.g., Free from Milk, Eggs).
+                    - Mention the cuisine and staple ingredients.
+
+                    3. **Nutritional Information**:
+                    - Ensure the calories, protein, and carbs are accurate and match the dataset.
+                    - Format as: **[NUM]kcal** • **[NUM]g protein** • **[NUM]g carbs**.
+
+                    4. **Follow-up Question**:
+                    - Ask a concise, engaging follow-up question (e.g., "Would you like to pair this with a side dish or explore more options?").
+
+                    Example:
+                    **Grilled Salmon with Lemon Herb Sauce**
                     A dish that aligns with:
-                    - {', '.join(user_prefs['diet'])} compliant
-                    - Free from {', '.join(user_prefs['allergens'])}
-                    - {', '.join(user_prefs['cuisine'])} flavors
-                    - Features {', '.join(user_prefs['staple'])}
-                    
-                    **[NUM] kcal** • **[NUM]g protein** • **[NUM]g carbs** (Ensure accuracy in carbohydrate count.)
-                    
-                    [A friendly, concise follow-up question to engage the user. Be serious and never use emojis and stay professional.]
-                    - If there is 'Dish Name' written instead of a proper dish name, respond with: "Try something else, please."
+                    - Non-Vegetarian compliant
+                    - Free from Milk, Eggs
+                    - Italian flavors
+                    - Features Salmon
+
+                    **450kcal** • **30g protein** • **20g carbs**
+
+                    Would you like to pair this with a side dish or explore more options?
                     """
                 },
                 {
                     "role": "user",
                     "content": f"""
-                    Current Question : {question}
-                    Raw suggestion: {initial_message}
+                    Current Question: {question}
+                    Raw Suggestion: {initial_message}
                     Previous Prompts: {chat_history[-1]}
 
-                    **Dish Name from the initial message**
-                    - Culinary Profile: Dish Category | Flavor Profile
-                    - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs (GET THE CARBS AS WELL FROM THE DATASET)
-                    - Perfect Match Because: 
-                    🎯 Combines your love for (user_flavor) with (diet_type) needs
-                    ⏰ Ideal for (meal_type) with (key_characteristic)
-                    🌟 Fresh alternative to (last_dish) ((improvement_metric))
-                    You can also try the (dish that goes well with the current dish)
-
-                    
-
-                    IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
-
-                    First check the question and suggestion. If it does not match just write : "Kindly try another query please."
-                    Also if the user has asked something previously connect the current response with it.
-                    
                     Analyze the suggestion and refine it according to these principles:
-                    1. Craft an engaging opening that naturally introduces the dish.
-                    2. Present four checkmarked attributes based on user preferences.
-                    3. Extract and format nutritional information correctly.
-                    4. Conclude with a concise, engaging follow-up.
-                    In this case where dish name is not there, just say : "Kindly try another query please."
+                    1. Extract the dish name from the raw suggestion. If no dish name is found, respond with: "Kindly try another query, please."
+                    2. Ensure the nutritional information (calories, protein, carbs) is accurate and matches the dataset.
+                    3. Format the response as shown in the example above.
+                    4. Conclude with a concise, engaging follow-up question.
                     """
                 }
             ],
             temperature=0.2,
-            max_tokens=100
+            max_tokens=150
         )
 
 
