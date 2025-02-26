@@ -461,7 +461,7 @@ async def chat_endpoint(request: ChatRequest):
 
                     IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
 
-                    - If there is 'Dish Name' written instead of a proper dish name, respond with: "Try something else, please."
+                    
                     - Begin with an engaging opening line tailored to the user’s preferences. Example: "Craving something spicy? Here’s a great choice."
                     
                     **[Dish Name]**
@@ -474,6 +474,7 @@ async def chat_endpoint(request: ChatRequest):
                     **[NUM] kcal** • **[NUM]g protein** • **[NUM]g carbs** (Ensure accuracy in carbohydrate count.)
                     
                     [A friendly, concise follow-up question to engage the user. Be serious and never use emojis and stay professional.]
+                    - If there is 'Dish Name' written instead of a proper dish name, respond with: "Try something else, please."
                     """
                 },
                 {
@@ -483,7 +484,7 @@ async def chat_endpoint(request: ChatRequest):
                     Raw suggestion: {initial_message}
                     Previous Prompts: {chat_history[-1]}
 
-                    **Dish Name**
+                    **Dish Name from the initial message**
                     - Culinary Profile: Dish Category | Flavor Profile
                     - Nutrition Spotlight: (Calories)kcal • (Protein)g protein  (Carbs)g carbs (GET THE CARBS AS WELL FROM THE DATASET)
                     - Perfect Match Because: 
@@ -492,7 +493,7 @@ async def chat_endpoint(request: ChatRequest):
                     🌟 Fresh alternative to (last_dish) ((improvement_metric))
                     You can also try the (dish that goes well with the current dish)
 
-                    In this case where dish name is not there, just say : "Kindly try another query please."
+                    
 
                     IF ASKED SOMETHING FROM THE PREVIOUS QUESTION,DIRECTLY ANSWER. For example. calorie count of the previous dish.
 
@@ -504,6 +505,7 @@ async def chat_endpoint(request: ChatRequest):
                     2. Present four checkmarked attributes based on user preferences.
                     3. Extract and format nutritional information correctly.
                     4. Conclude with a concise, engaging follow-up.
+                    In this case where dish name is not there, just say : "Kindly try another query please."
                     """
                 }
             ],
