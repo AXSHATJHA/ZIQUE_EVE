@@ -359,7 +359,7 @@ async def chat_endpoint(request: ChatRequest):
                 - Implicit preferences (e.g., if 3/5 last dishes were salads → favor light options)
                 3. **Temporal Weighting**: Recent messages (last 2-3 exchanges) have 2x impact vs older history.
                 -> IF THE USER HAS ASKED FOR A DISH CATEGORY THAT DOES NOT EXIST LIKE A DRINK DO NOT SUGGEST ANY DISH.....
-                4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with pasta).
+                4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with garlic bread).
 
                 RESPONSE PROTOCOL:
                 IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONSRECOMMEND SOMETHING DIFFERENT FROM LAST CHOICE BUT NEVER RECOMMEND THE SAME LAST CHOICE OR JUST SAY NOT AVAILABLE.
@@ -420,7 +420,7 @@ async def chat_endpoint(request: ChatRequest):
                     🎯 Combines your love for (user_flavor) with (diet_type) needs
                     ⏰ Ideal for (meal_type) with (key_characteristic)
                     🌟 Fresh alternative to (last_dish) ((improvement_metric))
-                    You can also try the (dish that pairs with the current dish)
+                    Suggest a dish from the dataset that goes well with the current dish.
 
                     EXAMPLE IMPLEMENTATION:
                     **Spicy Tuna Sushi**
@@ -430,7 +430,7 @@ async def chat_endpoint(request: ChatRequest):
                     🎯 Balances your spice preference with keto compliance
                     ⏰ Light yet satisfying lunch option
                     🌟 20% leaner than your last tempura choice
-                    You can pair it with a dessert - (a dessert choice)
+                    You can pair it with dumplings, or soups.
 
                     Looking for a vegetarian delight with a spicy kick? Here's a dish that excludes your allergen, mushrooms, and aligns with your love for cottage cheese.\n\n**Mexican Bean and Guacamole Burger**\nA dish that aligns with:\n- Vegetarian compliant\n- Free from mushrooms\n- Spicy flavors\n- Features cottage cheese\n\n**600kcal**•**25g protein**•**80g carbs**\n\nHow about pairing this burger with a fresh salad for a complete meal?
 
@@ -491,7 +491,7 @@ async def chat_endpoint(request: ChatRequest):
                     🎯 Combines your love for (user_flavor) with (diet_type) needs
                     ⏰ Ideal for (meal_type) with (key_characteristic)
                     🌟 Fresh alternative to (last_dish) ((improvement_metric))
-                    You can also try the (dish that pairs with the current dish)
+                    You can also try the (dish that goes well with the current dish)
 
                     In this case where dish name is not there, just say : "Kindly try another query please."
 
