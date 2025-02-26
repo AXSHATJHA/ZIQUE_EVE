@@ -174,7 +174,6 @@ async def chat_endpoint(request: ChatRequest):
         chat_history = request.chat_history
         thread_id = request.thread_id
 
-
         # Route the question
         source = question_router.invoke({"question": question})
         print(f"Routing decision: {source.datasource}")
