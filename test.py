@@ -280,20 +280,20 @@ async def chat_endpoint(request: ChatRequest):
                     if "user palate" in content.lower():
                         try:
                             # Extract the JSON-like palate information
-                            start_index = content.find("{")
-                            end_index = content.rfind("}") + 1
-                            palate_json = content[start_index:end_index]
+                            patterns = {
+                                "diet": r"diet:\s*([^\n]+)",
+                                "allergens": r"allergies:\s*([^\n]+)",
+                                "cuisine": r"cuisine:\s*([^\n]+)",
+                                "dislikes": r"dislikes:\s*([^\n]+)",
+                                "staple": r"staple:\s*([^\n]+)"
+                            }
 
-                            # Parse the JSON
-                            import json
-                            palate_data = json.loads(palate_json)
-
-                            # Extract preferences
-                            user_prefs['diet'].update(palate_data.get("diet", []))
-                            user_prefs['allergens'].update(palate_data.get("allergies", []))
-                            user_prefs['cuisine'].update(palate_data.get("cuisine", []))
-                            user_prefs['dislikes'].update(palate_data.get("dislikes", []))
-                            user_prefs['staple'].update(palate_data.get("staple", []))
+                            # Extract data using regex
+                            for key, pattern in patterns.items():
+                                match = re.search(pattern, content, re.IGNORECASE)
+                                if match:
+                                    values = match.group(1).strip().split(",")  # Split comma-separated values
+                                    user_prefs[key].update(map(str.strip, values))  # Remove extra spaces
 
                         except Exception as e:
                             print(f"Error parsing user palate: {e}")
@@ -345,7 +345,7 @@ async def chat_endpoint(request: ChatRequest):
 
                 CONTEXTUAL PRIORITIZATION:
 
-                IF THE DIET IS NON-VEGETARIAN TRY SUGGESTING NON-VEGETARIAN DISH FIRST.
+                IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
                 FOR EXAMPLE IF THE LAST ANSWER IS : 
                 "role": "assistant",
