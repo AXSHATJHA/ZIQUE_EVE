@@ -322,6 +322,7 @@ async def chat_endpoint(request: ChatRequest):
                     f"{row['Flavor_Profile']} | {row['Dish_Category']}\n"
                 )
 
+            assistant_messages = [msg for msg in chat_history if msg["role"] == "assistant"]
 
             # Construct prompt with user preferences
             prompt = f"""
@@ -334,6 +335,9 @@ async def chat_endpoint(request: ChatRequest):
                 === CHRONOLOGICAL HISTORY ===
                 {chat_history[-5:]}
 
+                === DISHES RECOMMENDED===
+                {assistant_messages}
+
                 === USER PALATE PROFILE ===
                 Dietary Identity: {', '.join(user_prefs['diet']) or 'None specified'}
                 Absolute Exclusions: {', '.join(user_prefs['allergens']) or 'None'}
@@ -345,6 +349,8 @@ async def chat_endpoint(request: ChatRequest):
                 "{question}"
 
                 CONTEXTUAL PRIORITIZATION:
+
+                ALWAYS TRY TO SUGGEST DIFFERENT DISHES, GO TO CORNERS OF THE DATASET TO GET THE DESIRED DISH BUT ALWAYS MATCH THE PALATE AND QUESTION.
 
                 IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
@@ -362,7 +368,8 @@ async def chat_endpoint(request: ChatRequest):
                 4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with garlic bread).
 
                 RESPONSE PROTOCOL:
-                IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONSRECOMMEND SOMETHING DIFFERENT FROM LAST CHOICE BUT NEVER RECOMMEND THE SAME LAST CHOICE OR JUST SAY NOT AVAILABLE.
+                ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {assistant_messages} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
+                
                 1. **Opening Context**: 
                 - Acknowledge previous dish if relevant ("Building on your sushi choice...")
                 - Explicitly state *why* the recommendation fits the *current* ask
