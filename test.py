@@ -304,7 +304,7 @@ async def chat_endpoint(request: ChatRequest):
                 Preferred Cuisines: {', '.join(user_prefs['cuisine']) or 'Open to all'}
                 Dislikes: {', '.join(user_prefs['dislikes']) or 'None'}
                 Staples: {', '.join(user_prefs['staple']) or 'None'}
-                  """
+                """
             )
 
             # Convert dietary columns to flags
@@ -322,7 +322,20 @@ async def chat_endpoint(request: ChatRequest):
                     f"{row['Flavor_Profile']} | {row['Dish_Category']}\n"
                 )
 
+            # Extract previously recommended dishes from assistant messages
             assistant_messages = [msg for msg in chat_history if msg["role"] == "assistant"]
+            recommended_dishes = set()
+
+            for msg in assistant_messages:
+                # Extract dish names from assistant messages
+                dish_match = re.search(r"\*\*([^\n]+)\*\*", msg["content"])
+                if dish_match:
+                    recommended_dishes.add(dish_match.group(1).strip())
+
+            print(f"Previously recommended dishes: {recommended_dishes}")
+
+            # Filter out previously recommended dishes
+            filtered_dishes = df[~df['Dish_Name'].isin(recommended_dishes)]
 
             # Construct prompt with user preferences
             prompt = f"""
@@ -335,7 +348,7 @@ async def chat_endpoint(request: ChatRequest):
                 === CHRONOLOGICAL HISTORY ===
                 {chat_history[-5:]}
 
-                === DISHES RECOMMENDED===
+                === DISHES RECOMMENDED ===
                 {assistant_messages}
 
                 === USER PALATE PROFILE ===
@@ -368,7 +381,7 @@ async def chat_endpoint(request: ChatRequest):
                 4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with garlic bread).
 
                 RESPONSE PROTOCOL:
-                ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {assistant_messages} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
+                ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {recommended_dishes} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
                 
                 1. **Opening Context**: 
                 - Acknowledge previous dish if relevant ("Building on your sushi choice...")
