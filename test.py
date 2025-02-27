@@ -261,7 +261,7 @@ async def chat_endpoint(request: ChatRequest):
             print("---Handling Vectorstore Query---")
 
             # Load Eve's dataset
-            df = pd.read_csv("Eve Macros Sheet_1.csv")
+            df = pd.read_csv("Eve_Menu.csv")
 
             user_prefs = {
                 'diet': set(),
@@ -365,7 +365,8 @@ async def chat_endpoint(request: ChatRequest):
 
                 ALWAYS TRY TO SUGGEST DIFFERENT DISHES, GO TO CORNERS OF THE DATASET TO GET THE DESIRED DISH BUT ALWAYS MATCH THE PALATE AND QUESTION.
 
-                IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
+                STRICTLY FOLLOW -> IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS VEGETARIAN NEVER SUGGEST SOMETHING THAT HAS CHICKEN!!(ALWAYS FOLLOW THIS)
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
                 FOR EXAMPLE IF THE LAST ANSWER IS : 
                 "role": "assistant",
