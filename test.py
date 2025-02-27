@@ -393,7 +393,7 @@ async def chat_endpoint(request: ChatRequest):
                 4. **Pairing Suggestions**: Suggest a dish that pairs well with the current recommendation (e.g., pizza with garlic bread).
 
                 RESPONSE PROTOCOL:
-                ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {recommended_dishes} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
+                ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS OR SOMETHING LOWER CALORIE OPTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {recommended_dishes} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
                 
                 STRICTLY FOLLOW -> IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
                 STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
