@@ -377,7 +377,7 @@ async def chat_endpoint(request: ChatRequest):
                 ALWAYS TRY TO SUGGEST DIFFERENT DISHES, GO TO CORNERS OF THE DATASET TO GET THE DESIRED DISH BUT ALWAYS MATCH THE PALATE AND QUESTION.
 
                 STRICTLY FOLLOW -> IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
-                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS VEGETARIAN, JAIN NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
                 IF THE CURRENT QUESTION IS YES OR NO LOOK AT THE LAST ANSWER AND SUGGEST DISH.
                 FOR EXAMPLE IF THE LAST ANSWER IS : 
                 "role": "assistant",
@@ -395,6 +395,8 @@ async def chat_endpoint(request: ChatRequest):
                 RESPONSE PROTOCOL:
                 ->*IF THE USER HAS ASKED FOR MORE OR OTHER SUGGESTIONS, RECOMMEND SOMETHING THAT HAS NOT BEEN RECOMMENDED IN {recommended_dishes} DISHES THAT ARE RECOMMENDED. PLEASE MAKE SURE OF THAT!!
                 
+                STRICTLY FOLLOW -> IF THE Dietary Identity IS Non-Vegetarian Find the Chicken Dish and Suggest THAT.
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
                 1. **Opening Context**: 
                 - Acknowledge previous dish if relevant ("Building on your sushi choice...")
                 - Explicitly state *why* the recommendation fits the *current* ask
@@ -405,7 +407,9 @@ async def chat_endpoint(request: ChatRequest):
                 - Use contractions ("you'll love") and food emotiveness ("velvety sauce")
                 - Never list numbers → "protein-packed" not "25g protein"
                 - For "compare" requests → Use relative terms ("lighter than your last pick") 
-
+                
+                
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
                 DYNAMIC FILTER ADJUSTMENT:
                 - If the current query contradicts previous preferences (e.g., "Ignore my keto rule today"), temporarily disable conflicting filters
                 - For vague requests ("Something new"), use history to infer:
@@ -418,13 +422,16 @@ async def chat_endpoint(request: ChatRequest):
                 - Core Identity: Prioritize {user_prefs['diet']} compliant options
                 - Cuisine Matching: Weight dishes from {user_prefs['cuisine']} higher
                 - Dislikes: Exclude dishes containing {user_prefs['dislikes']}
-
+                
+                
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
                 2. NUTRITIONAL INTERPRETATION:
                 Language Patterns → Nutritional Logic:
                 - "Light"/"Healthy" → <400kcal & <15g fat
                 - "Hearty"/"Filling" → >500kcal & >25g protein  
                 - "Quick" → Breakfast/Brunch/Lunch categories
                 - Comparison Requests: ±20% of last dish's values
+                STRICTLY FOLLOW -> IF THE DIETARY IDENTITY IS *VEGETARIAN, JAIN* NEVER SUGGEST SOMETHING THAT HAS CHICKEN, PRAWNS, FISH, EGGS!!(ALWAYS FOLLOW THIS)
 
                 3. TEMPORAL CONTEXT HANDLING:
                 - Morning (5-11AM): Boost breakfast items
