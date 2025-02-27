@@ -535,7 +535,7 @@ async def chat_endpoint(request: ChatRequest):
                 }
             ],
             temperature=0.2,
-            max_tokens=150
+            max_tokens=200
         )
 
 
