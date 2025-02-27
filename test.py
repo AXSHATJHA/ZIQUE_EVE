@@ -19,7 +19,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 import re
 
-df = pd.read_csv('Eve Macros Sheet.csv')  # Changed filename
+df = pd.read_csv('Eve_Menu.csv')  # Changed filename
 load_dotenv()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
