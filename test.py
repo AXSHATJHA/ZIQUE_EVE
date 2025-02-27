@@ -326,8 +326,10 @@ async def chat_endpoint(request: ChatRequest):
             assistant_messages = [msg for msg in chat_history if msg["role"] == "assistant"]
             recommended_dishes = set()
 
+            print(chat_history[-1:])
+
             for msg in assistant_messages:
-                # Extract dish names from assistant messages
+                # Extract dish names from assistant messages using regex
                 dish_match = re.search(r"\*\*([^\n]+)\*\*", msg["content"])
                 if dish_match:
                     recommended_dishes.add(dish_match.group(1).strip())
@@ -336,6 +338,12 @@ async def chat_endpoint(request: ChatRequest):
 
             # Filter out previously recommended dishes
             filtered_dishes = df[~df['Dish_Name'].isin(recommended_dishes)]
+
+            # If no dishes are left after filtering, reset the recommended_dishes set
+            if filtered_dishes.empty:
+                print("No new dishes left to recommend. Resetting recommended dishes.")
+                recommended_dishes = set()
+                filtered_dishes = df
 
             # Construct prompt with user preferences
             prompt = f"""
